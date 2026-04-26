@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Реєстрація</title>
+</head>
+<body>
+    <a href="{% url 'home' %}">Повернутися на головну</a>
+    <h2>Створити новий акаунт</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Зареєструватися</button>
+    </form>
+
+    <p>Вже є акаунт? <a href="/admin/login/">Увійти тут</a></p>
+    <br>
+</body>
+</html>

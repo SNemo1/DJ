@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>To-Do System</title>
+</head>
+<body>
+    <h1>Система управління завданнями</h1>
+
+    {% if user.is_authenticated %}
+        <p>Привіт, {{ user.username }}! <a href="/admin/logout/">Вийти</a></p>
+        <button>Створити нову дошку (скоро додамо)</button>
+    {% else %}
+        <p><a href="{% url 'register' %}">Зареєструватися</a> або <a href="/admin/login/">Увійти</a></p>
+    {% endif %}
+
+    <h2>Доступні дошки:</h2>
+    <ul>
+        {% for board in boards %}
+            <li><a href="{% url 'board_detail' board.id %}">{{ board.title }}</a> (Власник: {{ board.owner.username }})</li>
+        {% empty %}
+            <li>Дощок поки немає.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
