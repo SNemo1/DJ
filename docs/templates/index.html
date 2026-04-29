@@ -7,10 +7,16 @@
     <h1>Система управління завданнями</h1>
 
     {% if user.is_authenticated %}
-        <p>Привіт, {{ user.username }}! <a href="/admin/logout/">Вийти</a></p>
+        <p>
+            Привіт, {{ user.username }}!
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Вийти</button>
+            </form>
+        </p>
         <button>Створити нову дошку (скоро додамо)</button>
     {% else %}
-        <p><a href="{% url 'register' %}">Зареєструватися</a> або <a href="/admin/login/">Увійти</a></p>
+        <p><a href="{% url 'register' %}">Зареєструватися</a> або <a href="{% url 'login' %}">Увійти</a></p>
     {% endif %}
 
     <h2>Доступні дошки:</h2>
