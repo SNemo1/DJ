@@ -14,7 +14,7 @@
                 <button type="submit">Вийти</button>
             </form>
         </p>
-        <button>Створити нову дошку (скоро додамо)</button>
+        <p><a href="{% url 'create_board' %}">Створити нову дошку</a></p>
     {% else %}
         <p><a href="{% url 'register' %}">Зареєструватися</a> або <a href="{% url 'login' %}">Увійти</a></p>
     {% endif %}
