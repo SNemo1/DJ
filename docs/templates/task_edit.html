@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Редагувати завдання</title>
+</head>
+<body>
+    <a href="{% url 'task_detail' task.id %}">Назад до завдання</a>
+    ·
+    <a href="{% url 'board_detail' board.id %}">Дошка: {{ board.title }}</a>
+    <h1>Редагувати завдання</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Зберегти зміни</button>
+    </form>
+</body>
+</html>

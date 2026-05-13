@@ -3,9 +3,18 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db import models
-from .models import Board, Task, Comment
+from .models import Board, Task
 from .form import BoardForm, TaskForm, CommentForm
+
+
+def can_access_board(user, board):
+    """Публічна дошка — доступ усім; приватна — лише власнику (авторизованому)."""
+    if board.is_public:
+        return True
+    return user.is_authenticated and board.owner_id == user.id
+
 
 def home(request):
     if request.user.is_authenticated:
@@ -66,8 +75,13 @@ def create_board(request):
 
 def board_detail(request, board_id):
     board = get_object_or_404(Board, id=board_id)
+    if not can_access_board(request.user, board):
+        raise PermissionDenied
+
     tasks = board.tasks.all()
-    if request.method == 'POST' and request.user.is_authenticated:
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            raise PermissionDenied
         form = TaskForm(request.POST, request.FILES)
         if form.is_valid():
             task = form.save(commit=False)
@@ -76,11 +90,25 @@ def board_detail(request, board_id):
             return redirect('board_detail', board_id=board.id)
     else:
         form = TaskForm()
-    return render(request, 'board_detail.html', {'board': board, 'tasks': tasks, 'form': form})
+
+    return render(
+        request,
+        'board_detail.html',
+        {
+            'board': board,
+            'tasks': tasks,
+            'form': form,
+            'can_access': True,
+        },
+    )
 
 
 def task_detail(request, task_id):
     task = get_object_or_404(Task, id=task_id)
+    board = task.board
+    if not can_access_board(request.user, board):
+        raise PermissionDenied
+
     comments = task.comments.all()
 
     if request.method == 'POST' and request.user.is_authenticated:
@@ -99,4 +127,40 @@ def task_detail(request, task_id):
     else:
         form = CommentForm()
 
-    return render(request, 'task_detail.html', {'task': task, 'comments': comments, 'form': form})
+    return render(
+        request,
+        'task_detail.html',
+        {
+            'task': task,
+            'board': board,
+            'comments': comments,
+            'form': form,
+            'can_access': can_access_board(request.user, board),
+        },
+    )
+
+
+@login_required
+def task_edit(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    board = task.board
+    if not can_access_board(request.user, board):
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST, request.FILES, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('task_detail', task_id=task.id)
+    else:
+        form = TaskForm(instance=task)
+
+    return render(
+        request,
+        'task_edit.html',
+        {
+            'form': form,
+            'task': task,
+            'board': board,
+        },
+    )

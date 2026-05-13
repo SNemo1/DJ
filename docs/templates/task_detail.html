@@ -1,31 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>{{ task.title }}</title>
 </head>
 <body>
+<p><a href="{% url 'board_detail' board.id %}">← Дошка «{{ board.title }}»</a></p>
 <h1>{{ task.title }}</h1>
 <p>Статус: {{ task.status }}</p>
 {% if task.photo %}
-    <img src="{{ task.photo.url }}" width="300">
+    <p><img src="{{ task.photo.url }}" alt="" width="300"></p>
 {% endif %}
 
+{% if user.is_authenticated and can_access %}
 <form method="post">
     {% csrf_token %}
     <button type="submit" name="change_status">Змінити статус</button>
 </form>
+<p><a href="{% url 'task_edit' task.id %}">Редагувати завдання (назва, фото)</a></p>
+{% endif %}
 
 <h3>Коментарі:</h3>
 <ul>
     {% for comment in comments %}
         <li><strong>{{ comment.author.username }}:</strong> {{ comment.text }}</li>
+    {% empty %}
+        <li>Коментарів поки немає.</li>
     {% endfor %}
 </ul>
 
-{% if user.is_authenticated %}
+{% if user.is_authenticated and can_access %}
     <form method="post">
-        {% csrf_token %} {{ form.as_p }}
+        {% csrf_token %}
+        {{ form.as_p }}
         <button type="submit">Додати коментар</button>
     </form>
 {% endif %}
